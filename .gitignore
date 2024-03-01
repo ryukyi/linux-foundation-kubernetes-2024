@@ -1,0 +1,5 @@
+# virtual env
+.venv
+
+# secret env file
+.env
