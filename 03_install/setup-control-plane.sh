@@ -4,7 +4,16 @@
 external_ip=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
 
 # Configure CONTROL PLANE
-sudo hostnamectl set-hostname k8scp && echo \"$external_ip k8scp\" | sudo tee -a /etc/hosts
+sudo hostnamectl set-hostname k8scp && echo $external_ip k8scp | sudo tee -a /etc/hosts
+
+# Write kubeadm-config.yaml
+cat <<EOF > $HOME/kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: 1.29.0
+controlPlaneEndpoint: "k8scp:6443"
+EOF
+
 cd $HOME/
 # configure .kube conf
 mkdir -p $HOME/.kube

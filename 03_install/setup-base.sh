@@ -75,17 +75,15 @@ echo "successfully installed kubeadm and kubectl"
 kubeadm version
 # Note: systemd is default
 
-# Download Go  1.22.0
-curl -LO https://go.dev/dl/go1.22.0.linux-amd64.tar.gz && \
-sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz && \
-rm go1.22.0.linux-amd64.tar.gz && \
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && \
-echo 'export GOPATH=$HOME/go' >> ~/.bashrc && \
-echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bashrc && \
-source ~/.bashrc
+# Download Go lazy way using snap
+sudo snap install go --classic
 go version
 
 echo "successfully installed go"
+
+# helix text editor
+sudo snap install helix --classic
+echo 'export EDITOR=hx' >> ~/.bashrc
 
 # most cloud providers disable anyway but in case running locally
 swapoff -a
