@@ -122,8 +122,6 @@ kubeadm join \
 # https://docs.cilium.io/en/stable/overview/intro/
 helm repo add cilium https://helm.cilium.io/
 helm repo update
-helm install cilium cilium/cilium --version 1.15.4 \
+helm install cilium cilium/cilium \
   --namespace kube-system > cilium.yaml
-
-kubectl apply -f cilium.yaml
 ```
