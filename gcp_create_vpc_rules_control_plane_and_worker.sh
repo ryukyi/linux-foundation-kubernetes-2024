@@ -48,7 +48,7 @@ gcloud compute networks create ${NETWORK_NAME} \
   --bgp-routing-mode=regional
 
 # Allow all on the network
-gcloud compute firewall-rules create ${FIREWALL_RULE_NAME_ALLOW_ALL} \
+gcloud compute firewall-rules create lfk-vpc-firewall-all \
   --project=${PROJECT_ID} \
   --description="Firewall rule for all traffic" \
   --direction=INGRESS \
@@ -58,10 +58,10 @@ gcloud compute firewall-rules create ${FIREWALL_RULE_NAME_ALLOW_ALL} \
   --rules=all \
   --source-ranges=0.0.0.0/0 
 
-# Create command for cp1-lfclass
+# Create cp1-lfclass control plane node
 VM_NAME=cp1-lfclass
 gcloud compute instances create ${VM_NAME} \
-	--project=lfk-kubernetes \
+	--project=${PROJECT_ID} \
 	--zone=${ZONE} \
 	--machine-type=${MACHINE_TYPE} \
 	--network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=${NETWORK_NAME} \
@@ -79,13 +79,11 @@ gcloud compute instances create ${VM_NAME} \
 
 # enable ssh
 gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_NAME}:${SSH_KEYS}"
-# setup base image with deps
-gcloud compute ssh "$VM_NAME" --project "$PROJECT_ID" --zone "$ZONE" --command "bash -s" < "./03_install/setup-base.sh"
 
-# Create command for worker1-lfclass
+# Create worker1-lfclass node
 VM_NAME=worker1-lfclass
 gcloud compute instances create ${VM_NAME} \
-	--project=lfk-kubernetes \
+	--project=${PROJECT_ID} \
 	--zone=${ZONE} \
 	--machine-type=${MACHINE_TYPE} \
 	--network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=${NETWORK_NAME} \
@@ -104,6 +102,15 @@ gcloud compute instances create ${VM_NAME} \
 # enable ssh
 gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_NAME}:${SSH_KEYS}"
 # setup base image with deps
-gcloud compute ssh "$VM_NAME" --project "$PROJECT_ID" --zone "$ZONE" --command "bash -s" < "./03_install/setup-base.sh"
 
+# Setup nodes
+# control plane scripts
+gcloud compute scp \
+	03_install/cilium-cni.yaml \
+	03_install/kube-config-setup-control-plane.sh \
+	03_install/kubeadm-config.yaml \
+	cp1-lfclass:/tmp --zone "${ZONE}"
+gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
 
+# worker
+gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
