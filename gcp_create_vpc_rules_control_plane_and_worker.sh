@@ -32,7 +32,7 @@ ZONE=${ZONE}
 # e.g. ssh-ed25519\ 1lZDI1NTEuqhbW5mymC7R\ username@gmail.com
 SSH_KEYS=${SSH_KEYS}
 # email name e.g username
-GCP_NAME=${GCP_NAME}
+GCP_USERNAME=${GCP_USERNAME}
 
 # Non secret environment variables
 MACHINE_TYPE=n2-standard-4
@@ -78,7 +78,7 @@ gcloud compute instances create ${VM_NAME} \
 	--reservation-affinity=any
 
 # enable ssh
-gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_NAME}:${SSH_KEYS}"
+gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_USERNAME}:${SSH_KEYS}"
 
 # Create worker1-lfclass node
 VM_NAME=worker1-lfclass
@@ -100,7 +100,7 @@ gcloud compute instances create ${VM_NAME} \
 	--reservation-affinity=any
 
 # enable ssh
-gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_NAME}:${SSH_KEYS}"
+gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_USERNAME}:${SSH_KEYS}"
 
 # Setup nodes
 # control plane scripts

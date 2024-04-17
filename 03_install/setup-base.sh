@@ -3,6 +3,8 @@
 # install and update as root:
 sudo -i
 
+cp /tmp/*.{sh,yaml} $HOME/
+
 # update and clean
 apt-get update
 apt-get install apt-transport-https git ca-certificates curl vim wget software-properties-common lsb-release gpg bash-completion runc -y
@@ -45,19 +47,23 @@ apt-get update &&  apt-get install containerd.io -y
 containerd config default > /etc/containerd/config.toml
 # set SystemdCgroup to true
 sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
+sed -e 's/sandbox_image = "registry.k8s.io\/pause:3.2"/sandbox_image = "registry.k8s.io\/pause:3.9"/g' -i /etc/containerd/config.toml
 systemctl restart containerd
 systemctl status containerd
 
 # install kubectl and kubeadm
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 # install kubeadm
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 apt-get update
-apt-get install -y kubeadm kubelet kubectl
+apt-get install -y --allow-change-held-packages kubeadm kubelet kubectl
 apt-mark hold kubelet kubeadm kubectl
+# Looks for kubernetes version and uses appropriate
+systemctl enable --now kubelet
+
 kubeadm version
 # Note: systemd is default
 
