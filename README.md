@@ -85,7 +85,8 @@ ssh cp1-lfclass
 
 ```bash
 cp /tmp/*.{sh,yaml} $HOME/
-./kube-config-setup-control-plane.sh
+chmod +x $HOME/kube-config-setup-control-plane.sh
+$HOME/kube-config-setup-control-plane.sh
 ```
 
 ### manually setup worker
@@ -102,7 +103,7 @@ Add k8scp to local hosts
 
 ```txt
 127.0.0.1 localhost
-10.128.0.4 k8scp #      <- add this line
+10.128.0.4 k8scp # <- add this line
 ```
 
 ssh into worker and join the node for example using the copied tokens from cp1-lfclass:

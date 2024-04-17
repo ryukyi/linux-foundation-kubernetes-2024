@@ -101,12 +101,10 @@ gcloud compute instances create ${VM_NAME} \
 
 # enable ssh
 gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_NAME}:${SSH_KEYS}"
-# setup base image with deps
 
 # Setup nodes
 # control plane scripts
 gcloud compute scp \
-	03_install/cilium-cni.yaml \
 	03_install/kube-config-setup-control-plane.sh \
 	03_install/kubeadm-config.yaml \
 	cp1-lfclass:/tmp --zone "${ZONE}"
