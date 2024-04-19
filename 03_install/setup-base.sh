@@ -9,6 +9,8 @@ cp /tmp/*.{sh,yaml} $HOME/
 apt-get update
 apt-get install apt-transport-https git ca-certificates curl vim wget software-properties-common lsb-release gpg bash-completion runc -y
 apt-get upgrade -y
+apt-get update
+apt-get upgrade linux-gcp linux-headers-gcp linux-image-gcp openssh-client openssh-server openssh-sftp-server python3-update-manager update-manager-core -y
 apt autoremove -y
 
 # Pre-requisites for containerd
@@ -47,7 +49,7 @@ apt-get update &&  apt-get install containerd.io -y
 containerd config default > /etc/containerd/config.toml
 # set SystemdCgroup to true
 sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
-sed -e 's/sandbox_image = "registry.k8s.io\/pause:3.2"/sandbox_image = "registry.k8s.io\/pause:3.9"/g' -i /etc/containerd/config.toml
+sed -e '/sandbox_image = "registry.k8s.io\/pause:/c\sandbox_image = "registry.k8s.io\/pause:3.9"' -i /etc/containerd/config.toml
 systemctl restart containerd
 systemctl status containerd
 

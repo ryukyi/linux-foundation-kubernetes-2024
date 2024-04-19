@@ -94,13 +94,20 @@ $HOME/kube-config-setup-control-plane.sh
 From control plane, generate a key:
 
 ```bash
+# This is run after setup.sh and after retrieving info for example external IP from GCP CLI
 cp /tmp/*.{sh,yaml} $HOME/
-sudo kubeadm token create # copy the output
-openssl x509 -pubkey   -in /etc/kubernetes/pki/ca.crt | openssl rsa   -pubin -outform der 2>/dev/null | openssl dgst   -sha256 -hex | sed 's/^.* //' # copy the output
+chmod +x kube-config-setup-control-plane.sh
+./kube-config-setup-control-plane.sh
 ```
 
-Add k8scp to local hosts
+Add k8scp to local hosts in both control plane and workers
 
+```bash
+# find internal ipv4
+hostname -i
+```
+
+output example updated `/etc/hosts`
 ```txt
 127.0.0.1 localhost
 10.128.0.4 k8scp # <- add this line
@@ -116,13 +123,25 @@ kubeadm join \
     sha256:6d541678b05652e1fa5d43908e75e67376e994c3483d6683f2a18673e5d2a1b0
 ```
 
+### Remove NoSchedule- taint from control plane
+
+```bash
+# unsure if this is needed
+kubectl taint nodes k8scp node.kubernetes.io/not-ready:NoSchedule-
+```
+
 ### Install cilium from control plane
 
 ```bash
 # install Cilium
 # https://docs.cilium.io/en/stable/overview/intro/
-helm repo add cilium https://helm.cilium.io/
-helm repo update
-helm install cilium cilium/cilium --version 1.14.1 \
-  --namespace kube-system > cilium.yaml
+helm upgrade --install cilium cilium/cilium --version 1.14.1 \
+    --namespace kube-system \
+    --set kubeProxyReplacement=strict \
+    --set k8sServiceHost=$internal_api \
+    --set k8sServicePort=6443
+# restart pods
+kubectl delete pods -n kube-system -l k8s-app=cilium
+# verify connection
+kubectl logs -n kube-system -l k8s-app=cilium
 ```

@@ -35,7 +35,8 @@ SSH_KEYS=${SSH_KEYS}
 GCP_USERNAME=${GCP_USERNAME}
 
 # Non secret environment variables
-MACHINE_TYPE=n2-standard-4
+MACHINE_TYPE=e2-standard-8
+# MACHINE_TYPE=n2-standard-16
 IMAGE=projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20240319
 DISK_TYPE=projects/${PROJECT_ID}/zones/${ZONE}/diskTypes/pd-balanced
 
@@ -108,7 +109,7 @@ gcloud compute scp \
 	03_install/kube-config-setup-control-plane.sh \
 	03_install/kubeadm-config.yaml \
 	cp1-lfclass:/tmp --zone "${ZONE}"
-gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+# gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
 
 # worker
-gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+# gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
