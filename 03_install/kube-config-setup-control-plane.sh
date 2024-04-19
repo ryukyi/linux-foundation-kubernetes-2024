@@ -6,7 +6,7 @@
 # internal network since they are all on the same vpc network
 internal_ip=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip)
 # update hosts to include internal IP and k8scp
-sudo hostnamectl set-hostname k8scp && echo \"$internal_ip k8scp\" | sudo tee -a /etc/hosts
+sudo hostnamectl set-hostname k8scp && echo "$internal_ip k8scp" | sudo tee -a /etc/hosts
 
 # intialise control plane
 sudo kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init.out
@@ -15,10 +15,14 @@ sudo kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
-less ./.kube/config
-q
+sudo apt-get install bash-completion -y
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> $HOME/.bashrc
+
+# install helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
 
 # # Install Container Networking Interface (CNI) Only one CNI per cluster
 # # although CNI-Genie is trying to change that so one could potentially
@@ -28,7 +32,7 @@ helm repo update
 helm upgrade --install cilium cilium/cilium --version 1.14.1 \
     --namespace kube-system \
     --set kubeProxyReplacement=strict \
-    --set k8sServiceHost=$internal_api \
+    --set k8sServiceHost=$internal_ip \
     --set k8sServicePort=6443
 
 # ## remove noschedule taints 

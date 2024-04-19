@@ -13,12 +13,12 @@ apt-get update
 apt-get upgrade linux-gcp linux-headers-gcp linux-image-gcp openssh-client openssh-server openssh-sftp-server python3-update-manager update-manager-core -y
 apt autoremove -y
 
-# Pre-requisites for containerd
-# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#forwarding-ipv4-and-letting-iptables-see-bridged-traffic
-cat <<EOF | tee /etc/modules-load.d/k8s.conf
-overlay
-br_netfilter
-EOF
+# text editor
+snap install helix --classic
+echo 'export EDITOR=hx' >> ~/.bashrc
+
+# most cloud providers disable anyway but in case running locally
+swapoff -a
 
 modprobe overlay
 modprobe br_netfilter
@@ -32,15 +32,25 @@ EOF
 
 # Apply sysctl params without reboot
 sysctl --system
+
+# create necessary keyrings file
 mkdir -p -m  755 /etc/apt/keyrings
 
 # Install docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-    | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/ubuntu \
     $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
+# Pre-requisites for containerd
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#forwarding-ipv4-and-letting-iptables-see-bridged-traffic
+cat <<EOF | tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
 
 # install containerd runtime with configs and set SystemdCgroup to true
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-runtime
@@ -58,6 +68,7 @@ systemctl status containerd
 
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
 # install kubeadm
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 apt-get update
@@ -69,21 +80,5 @@ systemctl enable --now kubelet
 kubeadm version
 # Note: systemd is default
 
-# Download Go lazy way using snap
-snap install go --classic
-go version
-
-# helix text editor lazy install instead of build from source with cargo
-snap install helix --classic
-echo 'export EDITOR=hx' >> ~/.bashrc
-
-# most cloud providers disable anyway but in case running locally
-swapoff -a
-
-# install helm
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-
-# logout from root
-exit
+# reboot and use latest kernel drivers
+reboot

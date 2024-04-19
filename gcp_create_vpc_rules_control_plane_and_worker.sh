@@ -106,10 +106,11 @@ gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-
 # Setup nodes
 # control plane scripts
 gcloud compute scp \
+	SOLUTIONS/s_03/cilium-cni.yaml \
 	03_install/kube-config-setup-control-plane.sh \
 	03_install/kubeadm-config.yaml \
 	cp1-lfclass:/tmp --zone "${ZONE}"
-# gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
 
 # worker
-# gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
