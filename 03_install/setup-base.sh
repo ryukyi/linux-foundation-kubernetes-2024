@@ -80,5 +80,4 @@ systemctl enable --now kubelet
 kubeadm version
 # Note: systemd is default
 
-# reboot and use latest kernel drivers
-reboot
+# ssh into node and reboot! Lots of updates and kernel changes here.

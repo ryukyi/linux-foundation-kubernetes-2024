@@ -66,7 +66,7 @@ Host worker1-lfclass
     HostName <XX.XXX.XX.XX>
     User <XXXXX>
     Port 22
-    IdentityFile ~/.ssh/work_dell_gcp
+    IdentityFile ~/.ssh/linxufoundation
 
 Host cp1-lfclass
     HostName <XX.XXX.XX.XX>
@@ -75,13 +75,20 @@ Host cp1-lfclass
     IdentityFile ~/.ssh/linxufoundation
 ```
 
-#### ssh into vm
+#### ssh into vm and reboot
+
+Do this for all nodes for example control plane:
 
 ```bash
 ssh cp1-lfclass
+sudo reboot
+ssh worker1-lfclass
+sudo reboot
 ```
 
 ### run setup control plane script
+
+ssh into the control plan cp1-lfclass
 
 ```bash
 cp /tmp/*.{sh,yaml} $HOME/
@@ -90,15 +97,6 @@ $HOME/kube-config-setup-control-plane.sh
 ```
 
 ### manually setup worker
-
-From control plane, generate a key:
-
-```bash
-# This is run after setup.sh and after retrieving info for example external IP from GCP CLI
-cp /tmp/*.{sh,yaml} $HOME/
-chmod +x kube-config-setup-control-plane.sh
-./kube-config-setup-control-plane.sh
-```
 
 Add k8scp to local hosts in both control plane and workers
 
@@ -123,25 +121,4 @@ kubeadm join \
     sha256:6d541678b05652e1fa5d43908e75e67376e994c3483d6683f2a18673e5d2a1b0
 ```
 
-### Remove NoSchedule- taint from control plane
-
-```bash
-# unsure if this is needed
-kubectl taint nodes k8scp node.kubernetes.io/not-ready:NoSchedule-
-```
-
-### Install cilium from control plane
-
-```bash
-# install Cilium
-# https://docs.cilium.io/en/stable/overview/intro/
-helm upgrade --install cilium cilium/cilium --version 1.14.1 \
-    --namespace kube-system \
-    --set kubeProxyReplacement=strict \
-    --set k8sServiceHost=$internal_api \
-    --set k8sServicePort=6443
-# restart pods
-kubectl delete pods -n kube-system -l k8s-app=cilium
-# verify connection
-kubectl logs -n kube-system -l k8s-app=cilium
-```
+The tokens are created at the end of the script: [kube-config-setup-control-plane.sh](/03_install/kube-config-setup-control-plane.sh)
