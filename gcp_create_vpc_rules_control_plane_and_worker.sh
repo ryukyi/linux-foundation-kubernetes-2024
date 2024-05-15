@@ -104,12 +104,14 @@ gcloud compute instances create ${VM_NAME} \
 gcloud compute instances add-metadata ${VM_NAME} --zone=${ZONE} --metadata "ssh-keys=${GCP_USERNAME}:${SSH_KEYS}"
 
 # Setup nodes
+gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+
+# worker
+gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
+
+# copy files into cp1-lfclass
 # control plane scripts
 gcloud compute scp \
 	03_install/kube-config-setup-control-plane.sh \
 	03_install/kubeadm-config.yaml \
 	cp1-lfclass:/tmp --zone "${ZONE}"
-gcloud compute ssh cp1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"
-
-# worker
-gcloud compute ssh worker1-lfclass --project "${PROJECT_ID}" --zone "${ZONE}" --command "bash -s" < "./03_install/setup-base.sh"

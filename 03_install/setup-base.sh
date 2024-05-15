@@ -15,7 +15,8 @@ apt autoremove -y
 
 # text editor
 snap install helix --classic
-echo 'export EDITOR=hx' >> ~/.bashrc
+# default for bash and kubectl
+echo 'export EDITOR=hx; export KUBE_EDITOR=hx' >> ~/.bashrc
 
 # most cloud providers disable anyway but in case running locally
 swapoff -a
